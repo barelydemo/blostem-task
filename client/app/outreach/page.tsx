@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -40,7 +40,29 @@ type ComplianceState = Record<string, ComplianceResult | null>
 type CheckingState = Record<string, boolean>
 const GENERATING_SKELETON_WIDTHS = ["71%", "86%", "69%", "93%", "80%", "74%", "88%", "67%"]
 
-export default function OutreachPage() {
+function OutreachPageFallback() {
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">Outreach generator</h1>
+        <p className="text-sm text-muted-foreground mt-1">Loading outreach workspace...</p>
+      </div>
+      <div className="rounded-lg border border-border p-6">
+        <div className="flex flex-col gap-2 animate-pulse">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-4 bg-muted rounded"
+              style={{ width: GENERATING_SKELETON_WIDTHS[i % GENERATING_SKELETON_WIDTHS.length] }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OutreachPageContent() {
   const params = useSearchParams()
   const initialLeadId = params.get("lead") ?? ""
 
@@ -296,5 +318,13 @@ export default function OutreachPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function OutreachPage() {
+  return (
+    <Suspense fallback={<OutreachPageFallback />}>
+      <OutreachPageContent />
+    </Suspense>
   )
 }
